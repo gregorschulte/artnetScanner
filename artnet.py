@@ -1,22 +1,22 @@
-@ -1,65 +0,0 @@
 import pygame
 import sys
 import python_artnet as Artnet
-import time
+
+# setup
+artnet_server = "127.0.0.1"
+device_address = 1
 
 # Initialize Pygame
 pygame.init()
 
 # By default it will listen on 0.0.0.0 (all interfaces)
-artNet = Artnet.Artnet()
+artNet = Artnet.Artnet(artnet_server)
 
 # Set up the display
 screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)  # Fullscreen mode
 
 # Define colors
-background_color = (255, 0, 0)
-gobo = pygame.image.load("gobo_spiral.png")
-gobo_rotation = 0
+background_color = (0, 0, 0)
 
 # Main loop
 running = True
@@ -28,38 +28,19 @@ while running:
     # Fetch the latest packet we received from universe 0.
     artNetPacket = artNet.readBuffer()[0]
     # And extract the DMX data from that packet.
-    dmxPacket = artNetPacket.data
-    
+    dmxPacket = artNetPacket.data    
     
     if type(dmxPacket) == list:        
-        print("list")
-        r = dmxPacket[0]
-        g = dmxPacket[1]
-        b = dmxPacket[2]
-        
-        gobo_on_off = dmxPacket[3]
-        #gobo_rotation = dmxPacket[4]
-        gobo_size = dmxPacket[5]
-        
+        r = dmxPacket[device_address -1]
+        g = dmxPacket[device_address]
+        b = dmxPacket[device_address + 1]     
         background_color = (r,g,b)
 
     # Fill the screen with red color
     screen.fill(background_color)
-    
-    gobo = pygame.transform.scale(gobo,(1920,1920))
-    
-    gobo_rotation = gobo_rotation + 1
-    if (gobo_rotation > 359):
-        gobo_rotation = 0
-    gobo = pygame.transform.rotate(gobo,gobo_rotation)
-    
-    
-    screen.blit(gobo,(-259,-530))
-
 
     # Update the display
     pygame.display.flip()
-    time.sleep(0.01)
 
 # Quit Pygame
 pygame.quit()
